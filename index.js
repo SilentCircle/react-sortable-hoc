@@ -5,7 +5,8 @@ import {SortableContainer, SortableElement, arrayMove} from './src/index';
 import range from 'lodash/range';
 import random from 'lodash/random';
 
-const SortableItem = SortableElement(({height, value}) => (
+const SortableItem = SortableElement(props => {
+  return (
     <div style={{
         position: 'relative',
         width: '100%',
@@ -15,13 +16,15 @@ const SortableItem = SortableElement(({height, value}) => (
         borderBottom: '1px solid #EFEFEF',
         boxSizing: 'border-box',
         WebkitUserSelect: 'none',
-        height: height
+        height: props.height
     }}>
-        Item {value}
+        Item {props.value}
+        {props.children}
     </div>
-));
+  )
+});
 
-const SortableList = SortableContainer(({items}) => (
+const SortableList = SortableContainer(({items, onRemove}) => (
     <div style={{
         width: '80%',
         height: '80vh',
@@ -32,7 +35,15 @@ const SortableList = SortableContainer(({items}) => (
         border: '1px solid #EFEFEF',
         borderRadius: 3
     }}>
-        {items.map(({height, value}, index) => <SortableItem key={`item-${index}`} index={index} value={value} height={height}/>)}
+        {
+          items.map(({height, value}, index) => {
+            return (
+              <SortableItem key={`item-${index}`} index={index} value={value} height={height}>
+                <a onClick={onRemove.bind(null, index)}>{'x'}</a>
+              </SortableItem>
+            )
+          })
+        }
     </div>
 ));
 
@@ -52,10 +63,13 @@ class Example extends Component {
             items: arrayMove(items, oldIndex, newIndex)
         });
     };
+    onRemove = (index) => {
+      console.log('index', index);
+    };
     render() {
         const {items} = this.state;
 
-        return <SortableList items={items} onSortEnd={this.onSortEnd} />;
+        return <SortableList items={items} onRemove={this.onRemove} onSortEnd={this.onSortEnd} />;
     }
 }
 
